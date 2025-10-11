@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASK KMUTNB</title>
+    <link rel="icon" type="image/x-icon" href="./images/logo_kmutnb.png">
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://kit.fontawesome.com/26cab36fe2.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="navbar liquid-glass">
+            <div class="nav-title"><img src="./images/logo_kmutnb.png" width="48px"></div>
+            <div class="menu-toggle" onclick="toggleMenu()">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+            <ul class="menu-items" id="mobileMenu">
+                <li><a href="#"><i class="fa-solid fa-comment"></i> แชท</a></li>
+                <li><a href="#" onclick="openHistoryPopup(event)"><i class="fa-solid fa-clock-rotate-left"></i>
+                        ประวัติแชท</a></li>
+                <li><a href="#" onclick="openRightPanel(event)"><i class="fa-solid fa-circle-info"></i> ชี้แจงระบบ</a>
+                </li>
+                <li><a href="#"><i class="fa-solid fa-headphones"></i> ติดต่อเจ้าหน้าที่ </a></li>
+            </ul>
+        </div>
+
+        <section class="chat-window">
+            <div class="window liquid-glass" id="chatWindow">
+                <div class="chat-placeholder" id="chatPlaceholder">
+                    <img src="./images/logo_kmutnb.png" alt="Logo" class="logo">
+                    <h1> ASK KMUTNB </h1>
+                    <p style="margin-top: 0.2rem; font-weight: 500;">แชทบอทผู้ช่วยตอบทุกคำถามเกี่ยวกับการเข้าศึกษาที่
+                        มจพ.</p>
+                    <p style="margin-top: 1rem; font-weight: 400;">
+                        <b>สอบถามได้ทุกเรื่อง เช่น</b><br>
+                        📝 การเตรียมตัวสอบ | 🧪 ข้อมูลการสอบเข้า | 🎤 การสอบสัมภาษณ์ | 📚 คณะที่เปิดสอน<br>
+                        รวมถึงรายละเอียดทุนเรียนดี หอพัก และชีวิตในรั้วมหาวิทยาลัย
+                    </p>
+                    <p style="margin-top: 1.5rem; font-style: italic; opacity: 0.8;">เริ่มต้นพิมพ์คำถามของคุณได้เลย...
+                    </p>
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <textarea class="liquid-glass" id="userInput" placeholder="พิมพ์คำถามของคุณ..." rows="1"></textarea>
+                <button onclick="sendMessage()">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </section>
+
+        <footer>
+            <p>Believe every doubt in the answer to every question @ASKKMUTNB</p>
+        </footer>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeAllPopups()"></div>
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+
+    <div class="history-popup" id="historyPopup">
+        <button class="close-btn" onclick="closeHistoryPopup()">
+            <i class="fa-solid fa-times"></i>
+        </button>
+        <h3><i class="fa-solid fa-clock-rotate-left"></i> ประวัติแชท</h3>
+        <ul>
+            <li><i class="fa-solid fa-hashtag"></i> ตัวอย่างประวัติแชทที่เคยสอบถาม และ การสนทนา</li>
+            <li><i class="fa-solid fa-hashtag"></i> คำถามเกี่ยวกับการสมัครเข้าศึกษาที่ มจพ.</li>
+            <li><i class="fa-solid fa-hashtag"></i> ข้อมูลเกี่ยวกับทุนการศึกษาและค่าใช้จ่าย</li>
+            <li><i class="fa-solid fa-hashtag"></i> รายละเอียดเกี่ยวกับหอพักและสิ่งอำนวยความสะดวก</li>
+            <li><i class="fa-solid fa-hashtag"></i> การเตรียมตัวสอบเข้ามหาวิทยาลัย</li>
+            <li><i class="fa-solid fa-hashtag"></i> ข้อมูลคณะวิศวกรรมศาสตร์</li>
+            <li><i class="fa-solid fa-hashtag"></i> กิจกรรมและชมรมในมหาวิทยาลัย</li>
+        </ul>
+    </div>
+
+    <div class="history-popup" id="rightPanel">
+        <button class="close-btn" onclick="closeRightPanel()">
+            <i class="fa-solid fa-times"></i>
+        </button>
+        <h3><i class="fa-solid fa-circle-info"></i> ชี้แจงระบบ</h3>
+        <p style="margin-bottom: 10px;">
+            ระบบ ASK KMUTNB คือแชทบอทอัจฉริยะที่ช่วยตอบคำถามเกี่ยวกับการสมัครเรียน คณะ และชีวิตในมหาวิทยาลัย
+        </p>
+        <ul>
+            <li><i class="fa-solid fa-link"></i> ถามได้เกี่ยวกับคุณสมบัติผู้สมัคร</li>
+            <li><i class="fa-solid fa-link"></i> ข้อมูลทุนการศึกษาและค่าใช้จ่าย</li>
+            <li><i class="fa-solid fa-link"></i> ข้อมูลหอพักและสิ่งอำนวยความสะดวก</li>
+            <li><i class="fa-solid fa-link"></i> วิธีสมัครสอบและกำหนดการรับสมัคร</li>
+            <li><i class="fa-solid fa-link"></i> ข้อมูลเกี่ยวกับคณะ </li>
+        </ul>
+    </div>
+
+    <script src="./js/popup.js"></script>
+    <script src="./js/message.js"></script>
+</body>
+
+</html>
