@@ -1,3 +1,4 @@
+/* ===== TABLET BREAKPOINT ===== */
 @media screen and (max-width: 1024px) {
     .container {
         .navbar {
@@ -20,6 +21,7 @@
     }
 }
 
+/* ===== MOBILE BREAKPOINT ===== */
 @media screen and (max-width: 768px) {
     body {
         background-size: 2.5em 2.5em;
@@ -170,23 +172,24 @@
                 }
 
                 .chat-placeholder {
-                    width: 90%;
-                    padding: 15px;
-                    font-size: 1.8rem;
+                    width: 95%;
+                    padding: 10px;
+                    font-size: 1.5rem;
+                    transform: scale(0.9);
 
                     .logo {
-                        width: 120px;
-                        height: 120px;
+                        width: 100px;
+                        height: 100px;
                     }
 
                     h1 {
-                        font-size: 2rem;
-                        margin: 10px 0;
+                        font-size: 1.7rem;
+                        margin: 8px 0;
                     }
 
                     p {
-                        font-size: 13px;
-                        line-height: 1.5;
+                        font-size: 12px;
+                        line-height: 1.4;
                     }
                 }
             }
@@ -203,11 +206,28 @@
                 z-index: 999;
 
                 textarea {
-                    width: calc(100% - 90px);
-                    font-size: 0.95rem;
-                    padding: 20px;
+                    width: 90%;
+                    height: 50px !important;
+                    /* Fixed height with !important */
+                    min-height: 50px !important;
+                    /* Prevent shrinking */
+                    max-height: 50px !important;
+                    /* Prevent expanding */
+                    resize: none !important;
+                    /* Disable manual resize */
+                    overflow-y: auto !important;
+                    /* Add scrollbar when text is too long */
+                    font-size: 1rem;
                     border-radius: 24px;
                     margin-right: 10px;
+                    padding: 12px 24px;
+                    background: rgba(255, 255, 255, 0.12);
+                    backdrop-filter: blur(20px);
+                    -webkit-backdrop-filter: blur(20px);
+                    border: none;
+                    outline: none;
+                    box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 30px;
+                    animation: fadeInUp 1.6s ease-out;
                 }
 
                 button {
@@ -230,6 +250,7 @@
         }
     }
 
+    /* Menu Overlay */
     .menu-overlay {
         display: none;
         position: fixed;
@@ -246,6 +267,7 @@
         }
     }
 
+    /* Popup Adjustments */
     .history-popup {
         width: 92%;
         max-width: none;
@@ -284,6 +306,7 @@
     }
 }
 
+/* ===== SMALL MOBILE BREAKPOINT ===== */
 @media screen and (max-width: 480px) {
     .container {
         .navbar {
@@ -339,19 +362,20 @@
                 }
 
                 .chat-placeholder {
-                    font-size: 1.5rem;
+                    font-size: 1.3rem;
+                    transform: scale(0.85);
 
                     .logo {
-                        width: 90px;
-                        height: 90px;
+                        width: 75px;
+                        height: 75px;
                     }
 
                     h1 {
-                        font-size: 1.6rem;
+                        font-size: 1.4rem;
                     }
 
                     p {
-                        font-size: 12px;
+                        font-size: 11px;
                     }
                 }
             }
@@ -362,9 +386,14 @@
 
                 textarea {
                     width: calc(100% - 80px);
+                    height: 45px;
+                    min-height: 45px;
+                    max-height: 45px;
                     font-size: 0.9rem;
-                    padding: 18px;
+                    padding: 12px 18px;
                     border-radius: 20px;
+                    resize: none;
+                    overflow-y: auto;
                 }
 
                 button {
@@ -396,6 +425,7 @@
     }
 }
 
+/* ===== LANDSCAPE MODE ===== */
 @media screen and (max-width: 768px) and (orientation: landscape) {
     .container {
         .navbar {
@@ -417,19 +447,20 @@
                 padding: 60px 1rem 75px;
 
                 .chat-placeholder {
-                    font-size: 1.3rem;
+                    font-size: 1.1rem;
+                    transform: scale(0.8);
 
                     .logo {
-                        width: 70px;
-                        height: 70px;
+                        width: 60px;
+                        height: 60px;
                     }
 
                     h1 {
-                        font-size: 1.5rem;
+                        font-size: 1.3rem;
                     }
 
                     p {
-                        font-size: 11px;
+                        font-size: 10px;
                     }
                 }
             }
@@ -439,8 +470,13 @@
                 padding: 0 8px 8px;
 
                 textarea {
-                    padding: 16px;
+                    height: 42px;
+                    min-height: 42px;
+                    max-height: 42px;
+                    padding: 12px 16px;
                     border-radius: 18px;
+                    resize: none;
+                    overflow-y: auto;
                 }
 
                 button {
@@ -453,6 +489,7 @@
     }
 }
 
+/* ===== VERY SMALL SCREENS ===== */
 @media screen and (max-width: 360px) {
     .container {
         .navbar .menu-items {
@@ -461,16 +498,17 @@
 
         .chat-window .window .chat-placeholder {
             h1 {
-                font-size: 1.4rem;
+                font-size: 1.2rem;
             }
 
             p {
-                font-size: 11px;
+                font-size: 10px;
             }
         }
     }
 }
 
+/* ===== TOUCH DEVICE OPTIMIZATIONS ===== */
 @media (hover: none) and (pointer: coarse) {
     * {
         -webkit-tap-highlight-color: transparent;
@@ -483,6 +521,7 @@
     }
 }
 
+/* ===== SMOOTH SCROLLING ===== */
 @media screen and (max-width: 768px) {
 
     .window,
