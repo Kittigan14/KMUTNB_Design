@@ -262,7 +262,7 @@
 
         .chat-window {
             width: 100% !important;
-            height: 100vh;
+            height: 100vh ;
             margin: 0;
             padding: 0;
             position: fixed;
@@ -279,6 +279,7 @@
                 backdrop-filter: none !important;
                 box-shadow: none !important;
                 border-radius: 0 !important;
+                margin-top: 80px;
                 z-index: 1;
 
                 .message {
@@ -394,7 +395,7 @@
     /* Popup Adjustments */
     .history-popup {
         position: fixed;
-        top: 50%;
+        top: 400px;
         left: 50%;
         transform: translate(-50%, -50%) scale(0.9);
         width: 88%;
