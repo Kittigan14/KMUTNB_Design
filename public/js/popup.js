@@ -1,3 +1,5 @@
+// popup.js
+
 function toggleMenu() {
     const menu = document.getElementById("mobileMenu");
     const menuOverlay = document.getElementById("menuOverlay");

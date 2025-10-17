@@ -21,12 +21,12 @@
                 <i class="fa-solid fa-bars"></i>
             </div>
             <ul class="menu-items" id="mobileMenu">
-                <li><a href="#"><i class="fa-solid fa-comment"></i> แชท</a></li>
-                <li><a href="#" onclick="openHistoryPopup(event)"><i class="fa-solid fa-clock-rotate-left"></i>
-                        ประวัติแชท</a></li>
-                <li><a href="#" onclick="openRightPanel(event)"><i class="fa-solid fa-circle-info"></i> ชี้แจงระบบ</a>
-                </li>
-                <li><a href="#"><i class="fa-solid fa-headphones"></i> ติดต่อเจ้าหน้าที่ </a></li>
+                <li><a href="#"><i class="fa-solid fa-comment"></i><span>แชท</span></a></li>
+                <li><a href="#" onclick="openHistoryPopup(event)"><i
+                            class="fa-solid fa-clock-rotate-left"></i><span>ประวัติแชท</span></a></li>
+                <li><a href="#" onclick="openRightPanel(event)"><i
+                            class="fa-solid fa-circle-info"></i><span>ชี้แจงระบบ</span></a></li>
+                <li><a href="#"><i class="fa-solid fa-headphones"></i><span>ติดต่อเจ้าหน้าที่</span></a></li>
             </ul>
         </div>
 
@@ -54,10 +54,6 @@
                 </button>
             </div>
         </section>
-
-        <footer>
-            <p>Believe every doubt in the answer to every question @ASKKMUTNB</p>
-        </footer>
     </div>
 
     <div class="overlay" id="overlay" onclick="closeAllPopups()"></div>
@@ -98,8 +94,8 @@
 
     <script src="./js/popup.js"></script>
     <script src="./js/message.js"></script>
-    
-    <script>
+
+    <!-- <script>
         document.addEventListener('touchmove', function (event) {
             if (event.scale !== 1) {
                 event.preventDefault();
@@ -115,7 +111,7 @@
         }, {
             passive: false
         });
-    </script>
+    </script> -->
 </body>
 
 </html>
