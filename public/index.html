@@ -3,12 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>ASK KMUTNB</title>
     <link rel="icon" type="image/x-icon" href="./images/logo_kmutnb.png">
     <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/enhanced-history.css">
     <script src="https://kit.fontawesome.com/26cab36fe2.js" crossorigin="anonymous"></script>
 </head>
 
@@ -21,7 +20,7 @@
                 <i class="fa-solid fa-bars"></i>
             </div>
             <ul class="menu-items" id="mobileMenu">
-                <li><a href="#"><i class="fa-solid fa-comment"></i><span>แชท</span></a></li>
+                <li><a href="#" onclick="newChat(event)"><i class="fa-solid fa-comment"></i><span>แชทใหม่</span></a></li>
                 <li><a href="#" onclick="openHistoryPopup(event)"><i
                             class="fa-solid fa-clock-rotate-left"></i><span>ประวัติแชท</span></a></li>
                 <li><a href="#" onclick="openRightPanel(event)"><i
@@ -59,22 +58,39 @@
     <div class="overlay" id="overlay" onclick="closeAllPopups()"></div>
     <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
 
+    <!-- History Popup with Enhanced Features -->
     <div class="history-popup" id="historyPopup">
         <button class="close-btn" onclick="closeHistoryPopup()">
             <i class="fa-solid fa-times"></i>
         </button>
         <h3><i class="fa-solid fa-clock-rotate-left"></i> ประวัติแชท</h3>
-        <ul>
-            <li><i class="fa-solid fa-hashtag"></i> ตัวอย่างประวัติแชทที่เคยสอบถาม และ การสนทนา</li>
-            <li><i class="fa-solid fa-hashtag"></i> คำถามเกี่ยวกับการสมัครเข้าศึกษาที่ มจพ.</li>
-            <li><i class="fa-solid fa-hashtag"></i> ข้อมูลเกี่ยวกับทุนการศึกษาและค่าใช้จ่าย</li>
-            <li><i class="fa-solid fa-hashtag"></i> รายละเอียดเกี่ยวกับหอพักและสิ่งอำนวยความสะดวก</li>
-            <li><i class="fa-solid fa-hashtag"></i> การเตรียมตัวสอบเข้ามหาวิทยาลัย</li>
-            <li><i class="fa-solid fa-hashtag"></i> ข้อมูลคณะวิศวกรรมศาสตร์</li>
-            <li><i class="fa-solid fa-hashtag"></i> กิจกรรมและชมรมในมหาวิทยาลัย</li>
-        </ul>
+        
+        <div class="history-actions">
+            <button class="action-btn new-chat-btn" onclick="newChat(event)">
+                <i class="fa-solid fa-plus"></i>
+                <span>แชทใหม่</span>
+            </button>
+            <button class="action-btn clear-all-btn" onclick="confirmClearAll(event)">
+                <i class="fa-solid fa-trash-alt"></i>
+                <span>ล้างทั้งหมด</span>
+            </button>
+        </div>
+
+        <div id="historyList" class="history-list">
+            <div class="loading-spinner">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <p>กำลังโหลดประวัติ...</p>
+            </div>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <i class="fa-solid fa-comment-slash"></i>
+            <p>ยังไม่มีประวัติแชท</p>
+            <span>เริ่มต้นการสนทนาเพื่อบันทึกประวัติ</span>
+        </div>
     </div>
 
+    <!-- Right Panel -->
     <div class="history-popup" id="rightPanel">
         <button class="close-btn" onclick="closeRightPanel()">
             <i class="fa-solid fa-times"></i>
@@ -92,26 +108,22 @@
         </ul>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div class="confirmation-modal" id="confirmModal">
+        <div class="modal-content">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            <h4>ยืนยันการลบ</h4>
+            <p id="confirmMessage">คุณแน่ใจหรือไม่ว่าต้องการลบประวัติแชทนี้?</p>
+            <div class="modal-actions">
+                <button class="modal-btn cancel-btn" onclick="closeConfirmModal()">ยกเลิก</button>
+                <button class="modal-btn confirm-btn" onclick="executeDelete()">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
     <script src="./js/popup.js"></script>
     <script src="./js/message.js"></script>
-
-    <!-- <script>
-        document.addEventListener('touchmove', function (event) {
-            if (event.scale !== 1) {
-                event.preventDefault();
-            }
-        }, {
-            passive: false
-        });
-
-        window.addEventListener('wheel', function (event) {
-            if (event.ctrlKey) {
-                event.preventDefault();
-            }
-        }, {
-            passive: false
-        });
-    </script> -->
+    <script src="./js/history.js"></script>
 </body>
 
 </html>
