@@ -1,5 +1,3 @@
-// popup.js
-
 function toggleMenu() {
     const menu = document.getElementById("mobileMenu");
     const menuOverlay = document.getElementById("menuOverlay");
@@ -46,9 +44,28 @@ function closeRightPanel() {
     overlay.classList.remove("active");
 }
 
+function openContactPopup(event) {
+    event.preventDefault();
+    const contactPopup = document.getElementById('contactPopup');
+    const overlay = document.getElementById('overlay');
+
+    contactPopup.classList.add('active');
+    overlay.classList.add('active');
+    closeMenu();
+}
+
+function closeContactPopup() {
+    const contactPopup = document.getElementById('contactPopup');
+    const overlay = document.getElementById('overlay');
+
+    contactPopup.classList.remove('active');
+    overlay.classList.remove('active');
+}
+
 function closeAllPopups() {
     closeHistoryPopup();
     closeRightPanel();
+    closeContactPopup();
 }
 
 const textarea = document.getElementById("userInput");
@@ -58,3 +75,10 @@ if (textarea) {
         this.style.height = this.scrollHeight + "px";
     });
 }
+
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+        closeAllPopups();
+        closeMenu();
+    }
+});

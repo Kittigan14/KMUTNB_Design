@@ -26,191 +26,115 @@
 //     input.value = '';
 //     chatWindow.scrollTop = chatWindow.scrollHeight;
 // }
-// message.js - จัดการการส่งและรับข้อความ
 
-const API_URL = 'http://localhost:5500';
+const textarea = document.getElementById('userInput');
+if (textarea) {
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+    });
 
-if (!currentSessionId) {
-    var currentSessionId = Date.now().toString();
+    // Send message on Enter (Shift+Enter for new line)
+    textarea.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+        }
+    });
 }
 
+// Send message function
 async function sendMessage() {
-    const userInput = document.getElementById('userInput');
-    const message = userInput.value.trim();
-
-    if (!message) return;
-
-    displayMessage(message, 'user');
-    userInput.value = '';
-    resetTextareaHeight();
-
-    const loadingId = displayLoadingMessage();
-
+    const input = document.getElementById('userInput');
+    const message = input.value.trim();
+    
+    if (message === '') return;
+    
+    // Display user message
+    displayMessage(message, true);
+    
+    // Save user message to session
+    await addMessageToSession(message, 'user');
+    
+    // Clear input
+    input.value = '';
+    input.style.height = 'auto';
+    
+    // Show typing indicator
+    showTypingIndicator();
+    
+    // Get AI response
     try {
-        const response = await fetch(`${API_URL}/ask`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: message,
-                sessionId: currentSessionId
-            })
+        const result = await apiRequest(API_CONFIG.ENDPOINTS.AI_RESPONSE, 'POST', {
+            sessionId: currentSessionId,
+            userMessage: message
         });
-
-        const data = await response.json();
-
-        removeLoadingMessage(loadingId);
-
-        if (data.reply) {
-            if (data.sessionId) {
-                currentSessionId = data.sessionId;
-            }
-
-            displayMessage(data.reply, 'ai');
-        } else {
-            displayMessage('ขออภัย ไม่สามารถรับคำตอบได้ในขณะนี้', 'ai');
+        
+        if (result.success) {
+            // Remove typing indicator
+            removeTypingIndicator();
+            
+            // Display AI response
+            displayMessage(result.response.text, false);
+            
+            // Refresh session list
+            await refreshSessions();
         }
-
     } catch (error) {
-        console.error('Error:', error);
-        removeLoadingMessage(loadingId);
-        displayMessage('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง', 'ai');
+        console.error('Error getting AI response:', error);
+        removeTypingIndicator();
+        displayMessage('ขออภัย เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้ง', false);
     }
 }
 
-function displayMessage(text, sender) {
+// Display message in chat window
+function displayMessage(text, isUser) {
     const chatWindow = document.getElementById('chatWindow');
-    const chatPlaceholder = document.getElementById('chatPlaceholder');
-
-    if (chatPlaceholder && chatPlaceholder.style.display !== 'none') {
-        chatPlaceholder.classList.add('fade-out');
+    const placeholder = document.getElementById('chatPlaceholder');
+    
+    // Hide placeholder on first message
+    if (placeholder && !placeholder.classList.contains('fade-out')) {
+        placeholder.classList.add('fade-out');
         setTimeout(() => {
-            chatPlaceholder.style.display = 'none';
-        }, 300);
+            if (placeholder.parentNode) {
+                placeholder.parentNode.removeChild(placeholder);
+            }
+        }, 500);
     }
-
+    
+    // Create message element
     const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${sender === 'user' ? 'chat-user' : 'chat-ai'} fade-in`;
+    messageDiv.className = `message ${isUser ? 'chat-user' : 'chat-ai'} fade-in`;
     messageDiv.textContent = text;
-
+    
     chatWindow.appendChild(messageDiv);
-
+    
+    // Scroll to bottom
     chatWindow.scrollTop = chatWindow.scrollHeight;
-
-    return messageDiv;
 }
 
-function displayLoadingMessage() {
+// Show typing indicator
+function showTypingIndicator() {
     const chatWindow = document.getElementById('chatWindow');
-    const loadingId = 'loading-' + Date.now();
-
-    const loadingDiv = document.createElement('div');
-    loadingDiv.id = loadingId;
-    loadingDiv.className = 'message chat-ai fade-in';
-    loadingDiv.innerHTML = `
-        <div class="typing-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
+    
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message chat-ai typing-indicator fade-in';
+    typingDiv.id = 'typingIndicator';
+    typingDiv.innerHTML = `
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
     `;
-
-    chatWindow.appendChild(loadingDiv);
+    
+    chatWindow.appendChild(typingDiv);
     chatWindow.scrollTop = chatWindow.scrollHeight;
-
-    return loadingId;
 }
 
-function removeLoadingMessage(loadingId) {
-    const loadingDiv = document.getElementById(loadingId);
-    if (loadingDiv) {
-        loadingDiv.remove();
+// Remove typing indicator
+function removeTypingIndicator() {
+    const typingIndicator = document.getElementById('typingIndicator');
+    if (typingIndicator) {
+        typingIndicator.remove();
     }
 }
-
-function resetTextareaHeight() {
-    const textarea = document.getElementById('userInput');
-    textarea.style.height = 'auto';
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const textarea = document.getElementById('userInput');
-
-    if (textarea) {
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 200) + 'px';
-        });
-
-        textarea.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-
-        textarea.addEventListener('focus', function() {
-            if (window.innerWidth < 768) {
-                const viewport = document.querySelector('meta[name=viewport]');
-                if (viewport) {
-                    viewport.setAttribute('content', 
-                        'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-                }
-            }
-        });
-
-        textarea.addEventListener('blur', function() {
-            if (window.innerWidth < 768) {
-                const viewport = document.querySelector('meta[name=viewport]');
-                if (viewport) {
-                    viewport.setAttribute('content', 
-                        'width=device-width, initial-scale=1.0');
-                }
-            }
-        });
-    }
-});
-
-const style = document.createElement('style');
-style.textContent = `
-    .typing-indicator {
-        display: flex;
-        gap: 4px;
-        align-items: center;
-        padding: 8px 0;
-    }
-
-    .typing-indicator span {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background-color: #D3756B;
-        animation: typing 1.4s infinite;
-        opacity: 0.4;
-    }
-
-    .typing-indicator span:nth-child(1) {
-        animation-delay: 0s;
-    }
-
-    .typing-indicator span:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .typing-indicator span:nth-child(3) {
-        animation-delay: 0.4s;
-    }
-
-    @keyframes typing {
-        0%, 60%, 100% {
-            transform: translateY(0);
-            opacity: 0.4;
-        }
-        30% {
-            transform: translateY(-10px);
-            opacity: 1;
-        }
-    }
-`;
-document.head.appendChild(style);
+    

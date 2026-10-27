@@ -1,206 +1,195 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const axios = require('axios');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs').promises;
 
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+const PORT = 3000;
 
+// Middleware
+app.use(cors());
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const N8N_WEBHOOK_URL = 'https://your-n8n-domain.com/webhook/ai-chat';
-const HISTORY_FILE = path.join(__dirname, 'chat_history.json');
+// In-memory storage for chat sessions (จำกัด 3 sessions)
+let chatSessions = {};
+let sessionOrder = []; // เก็บลำดับ session
+const MAX_SESSIONS = 3;
 
-// ฟังก์ชันอ่านประวัติแชท
-async function readHistory() {
-  try {
-    const data = await fs.readFile(HISTORY_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    // ถ้าไม่มีไฟล์ ให้สร้างใหม่
-    return { sessions: [] };
-  }
+// Generate unique session ID
+function generateSessionId() {
+    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
-
-// ฟังก์ชันบันทึกประวัติแชท
-async function saveHistory(data) {
-  try {
-    await fs.writeFile(HISTORY_FILE, JSON.stringify(data, null, 2), 'utf8');
-    return true;
-  } catch (error) {
-    console.error('Error saving history:', error);
-    return false;
-  }
-}
-
-// API สำหรับส่งข้อความ
-app.post('/ask', async (req, res) => {
-  try {
-    const { message, sessionId } = req.body;
-
-    if (!message) {
-      return res.status(400).json({ error: 'Message is required' });
-    }
-
-    // ส่งข้อความไปยัง N8N
-    const response = await axios.post(N8N_WEBHOOK_URL, { message });
-    const reply = response.data.reply || 'ไม่ได้รับการตอบกลับจาก AI';
-
-    // บันทึกประวัติ
-    const history = await readHistory();
-    const timestamp = new Date().toISOString();
-    
-    let session = history.sessions.find(s => s.id === sessionId);
-    
-    if (!session) {
-      // สร้าง session ใหม่
-      session = {
-        id: sessionId || Date.now().toString(),
-        title: message.substring(0, 50) + (message.length > 50 ? '...' : ''),
-        createdAt: timestamp,
-        updatedAt: timestamp,
-        messages: []
-      };
-      history.sessions.unshift(session);
-    } else {
-      session.updatedAt = timestamp;
-    }
-
-    // เพิ่มข้อความในประวัติ
-    session.messages.push(
-      { role: 'user', content: message, timestamp },
-      { role: 'assistant', content: reply, timestamp }
-    );
-
-    await saveHistory(history);
-
-    res.json({ 
-      reply, 
-      sessionId: session.id,
-      timestamp 
-    });
-
-  } catch (error) {
-    console.error('Error:', error.message);
-    res.status(500).json({ error: 'Failed to process message.' });
-  }
-});
-
-// API ดึงรายการประวัติแชททั้งหมด
-app.get('/history', async (req, res) => {
-  try {
-    const history = await readHistory();
-    
-    // ส่งเฉพาะข้อมูลพื้นฐานของแต่ละ session
-    const sessions = history.sessions.map(session => ({
-      id: session.id,
-      title: session.title,
-      createdAt: session.createdAt,
-      updatedAt: session.updatedAt,
-      messageCount: session.messages.length
-    }));
-
-    res.json({ 
-      success: true, 
-      sessions,
-      total: sessions.length 
-    });
-  } catch (error) {
-    console.error('Error fetching history:', error);
-    res.status(500).json({ error: 'Failed to fetch history' });
-  }
-});
-
-// API ดึงข้อความในแชทเฉพาะ session
-app.get('/history/:sessionId', async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-    const history = await readHistory();
-    
-    const session = history.sessions.find(s => s.id === sessionId);
-    
-    if (!session) {
-      return res.status(404).json({ error: 'Session not found' });
-    }
-
-    res.json({ 
-      success: true, 
-      session 
-    });
-  } catch (error) {
-    console.error('Error fetching session:', error);
-    res.status(500).json({ error: 'Failed to fetch session' });
-  }
-});
-
-// API ลบแชทเฉพาะ session
-app.delete('/history/:sessionId', async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-    const history = await readHistory();
-    
-    const index = history.sessions.findIndex(s => s.id === sessionId);
-    
-    if (index === -1) {
-      return res.status(404).json({ error: 'Session not found' });
-    }
-
-    history.sessions.splice(index, 1);
-    await saveHistory(history);
-
-    res.json({ 
-      success: true, 
-      message: 'Session deleted successfully' 
-    });
-  } catch (error) {
-    console.error('Error deleting session:', error);
-    res.status(500).json({ error: 'Failed to delete session' });
-  }
-});
-
-// API ล้างประวัติทั้งหมด
-app.delete('/history', async (req, res) => {
-  try {
-    await saveHistory({ sessions: [] });
-    res.json({ 
-      success: true, 
-      message: 'All chat history cleared' 
-    });
-  } catch (error) {
-    console.error('Error clearing history:', error);
-    res.status(500).json({ error: 'Failed to clear history' });
-  }
-});
-
-// API สร้าง session ใหม่
-app.post('/session/new', async (req, res) => {
-  try {
-    const sessionId = Date.now().toString();
-    res.json({ 
-      success: true, 
-      sessionId 
-    });
-  } catch (error) {
-    console.error('Error creating session:', error);
-    res.status(500).json({ error: 'Failed to create session' });
-  }
-});
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Internal server error' });
+// API: Create new chat session
+app.post('/api/chat/new', (req, res) => {
+    const sessionId = generateSessionId();
+    
+    // ถ้ามี session เกิน 3 ให้ลบ session เก่าสุด
+    if (sessionOrder.length >= MAX_SESSIONS) {
+        const oldestSession = sessionOrder.shift();
+        delete chatSessions[oldestSession];
+    }
+    
+    chatSessions[sessionId] = [];
+    sessionOrder.push(sessionId);
+    
+    res.json({ 
+        success: true, 
+        sessionId,
+        message: 'New chat session created'
+    });
 });
 
-const PORT = process.env.PORT || 5500;
+// API: Get all sessions
+app.get('/api/chat/sessions', (req, res) => {
+    const sessions = sessionOrder.map(sessionId => ({
+        sessionId,
+        messageCount: chatSessions[sessionId].length,
+        firstMessage: chatSessions[sessionId][0]?.text.substring(0, 50) || 'Empty chat',
+        timestamp: sessionId.split('_')[1]
+    }));
+    
+    res.json({ 
+        success: true, 
+        sessions: sessions.reverse() // แสดงล่าสุดก่อน
+    });
+});
+
+// API: Get chat history for specific session
+app.get('/api/chat/history/:sessionId', (req, res) => {
+    const { sessionId } = req.params;
+    
+    if (!chatSessions[sessionId]) {
+        return res.status(404).json({ 
+            success: false, 
+            message: 'Session not found' 
+        });
+    }
+    
+    res.json({ 
+        success: true, 
+        sessionId,
+        history: chatSessions[sessionId] 
+    });
+});
+
+// API: Add message to session
+app.post('/api/chat/message', (req, res) => {
+    const { sessionId, text, sender } = req.body;
+    
+    if (!sessionId || !text || !sender) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Missing required fields' 
+        });
+    }
+    
+    if (!chatSessions[sessionId]) {
+        return res.status(404).json({ 
+            success: false, 
+            message: 'Session not found' 
+        });
+    }
+    
+    const message = {
+        text,
+        sender,
+        timestamp: Date.now()
+    };
+    
+    chatSessions[sessionId].push(message);
+    
+    res.json({ 
+        success: true, 
+        message: 'Message added',
+        sessionId 
+    });
+});
+
+// API: Clear specific session
+app.delete('/api/chat/clear/:sessionId', (req, res) => {
+    const { sessionId } = req.params;
+    
+    if (!chatSessions[sessionId]) {
+        return res.status(404).json({ 
+            success: false, 
+            message: 'Session not found' 
+        });
+    }
+    
+    chatSessions[sessionId] = [];
+    
+    res.json({ 
+        success: true, 
+        message: 'Session cleared' 
+    });
+});
+
+// API: Delete specific session
+app.delete('/api/chat/delete/:sessionId', (req, res) => {
+    const { sessionId } = req.params;
+    
+    if (!chatSessions[sessionId]) {
+        return res.status(404).json({ 
+            success: false, 
+            message: 'Session not found' 
+        });
+    }
+    
+    delete chatSessions[sessionId];
+    sessionOrder = sessionOrder.filter(id => id !== sessionId);
+    
+    res.json({ 
+        success: true, 
+        message: 'Session deleted' 
+    });
+});
+
+// API: Clear all sessions
+app.delete('/api/chat/clear-all', (req, res) => {
+    chatSessions = {};
+    sessionOrder = [];
+    
+    res.json({ 
+        success: true, 
+        message: 'All sessions cleared' 
+    });
+});
+
+// API: Mock AI response (สำหรับทดสอบ)
+app.post('/api/chat/ai-response', (req, res) => {
+    const { sessionId, userMessage } = req.body;
+    
+    if (!chatSessions[sessionId]) {
+        return res.status(404).json({ 
+            success: false, 
+            message: 'Session not found' 
+        });
+    }
+    
+    // Mock AI response
+    const aiResponse = {
+        text: `ขอบคุณสำหรับคำถาม: "${userMessage}". นี่คือคำตอบจากระบบ AI`,
+        sender: 'ai',
+        timestamp: Date.now()
+    };
+    
+    chatSessions[sessionId].push(aiResponse);
+    
+    res.json({ 
+        success: true, 
+        response: aiResponse 
+    });
+});
+
+// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server listening on port http://localhost:${PORT}`);
-  console.log(`📁 Chat history will be saved to: ${HISTORY_FILE}`);
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`📝 Max sessions: ${MAX_SESSIONS}`);
 });
+
+module.exports = app;
